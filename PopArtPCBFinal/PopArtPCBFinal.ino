@@ -2,24 +2,43 @@
 #include <Bounce2.h>
 #include"frames.h"
 
+Adafruit_NeoPixel strip (24, 0);
 
-Adafruit_NeoPixel strip (24,0);
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if (WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
 
+//button for the pcb
 Bounce butt = Bounce();
 
-
+//switch variable
 int stuff = 0;
+//wheel index
+int fade = 0;
 
-
+//timer variables
+long sT;
+int timer;
 
 void setup() {
   // put your setup code here, to run once:
 
   strip.begin();
   strip.clear();
+  strip.setBrightness(255);
 
   butt.attach(1);
   butt.interval(5);
+
+  sT = millis();
 
 }
 
@@ -29,7 +48,7 @@ void loop() {
   butt.update();
 
   if (butt.rose()) {
-    stuff = (stuff+1)%4;
+    stuff = (stuff + 1) % 4;
   }
 
 
@@ -51,6 +70,8 @@ void loop() {
   }
 }
 
+
+
 //////////////////////////////////////////////////////
 void offFunc() {
   strip.clear();
@@ -59,17 +80,24 @@ void offFunc() {
 //////////////////////////////////////////////////////
 void staticFunc() {
   for (int i = 0; i < strip.numPixels(); i++) {
-    //some stuff to add later
+    //white outside with colored center lable. Mybe follow the vinyl outside instead?
   }
 }
 //////////////////////////////////////////////////////
 void simpleFunc() {
-  for (int i = 0; i < strip.numPixels(); i++) {
-    //some stuff to add later
+  timer = 5;
+
+  if ((sT - millis()) > timer) {
+    for (int i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(fade));
+    }
+    fade = (fade + 1) % 255;
+    strip.show();
   }
+  sT = millis();
 }
 //////////////////////////////////////////////////////
 void fancyFunc() {
-
+  //make a rotating record animation, maybe have the lable in the middle color fade
 }
 //////////////////////////////////////////////////////
